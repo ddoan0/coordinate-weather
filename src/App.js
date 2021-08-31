@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { DateTime } from "luxon";
 
 const App = () => {
   const [latitude, setLatitude] = useState('32');
@@ -66,6 +67,9 @@ const App = () => {
           </li>
           <li>
             Time Zone:{info === null ? "loading" : info.properties.timeZone}
+          </li>
+          <li>
+            Time: {info === null ? "loading" : DateTime.now().setZone(info.properties.timeZone).toLocaleString(DateTime.TIME_SIMPLE)}
           </li>
         </ul>
       </div>
