@@ -8,6 +8,11 @@ const App = () => {
   const [info, setInfo] = useState(null);
   const [button, setButton] = useState(true);
 
+  //TO-DO: YUP FOR VALIDATION
+  //TO-DO: USEFETCH FOR FETCH
+  //TO-DO: JEST FOR UNIT TESTS
+  //TO-DO: PRETTIFY
+
   useEffect(() => {
     fetch(`https://api.weather.gov/points/${latitude},${longitude}`)
       .then(res => {
@@ -41,11 +46,16 @@ const App = () => {
 
   return (
     <div>
-      <input
-        type="text"
-        value={latitude}
-        onChange={handleLatitude}
-      />
+      <div>
+        Latitude
+        <input
+          type="text"
+          value={latitude}
+          onChange={handleLatitude}
+        />
+      </div>
+      
+      Longitude
       <input
         type="text"
         value={longitude}
