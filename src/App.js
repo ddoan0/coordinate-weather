@@ -7,6 +7,8 @@ const App = () => {
   const [latitude, setLatitude] = useState("32");
   const [longitude, setLongitude] = useState("-84");
   const [temperature, setTemperature] = useState(0);
+  const [forecast, setForecast] = useState("");
+  const [futureDays, setFutureDays] = useState([]);
   const [info, setInfo] = useState(null);
   const [button, setButton] = useState(true);
 
@@ -20,16 +22,32 @@ const App = () => {
       })
       .then((json) => {
         setInfo(json);
+        setForecast(json.properties.forecast);
         return fetch(json.properties.forecastHourly);
       })
       .then((result) => result.json())
-      .then((resJson) =>
-        setTemperature(resJson.properties.periods[0].temperature)
-      )
+      .then((resJson) => {
+        setTemperature(resJson.properties.periods[0].temperature);
+      })
       .catch((error) => {
         console.error(error);
       });
   }, [button, setButton]);
+
+  useEffect(() => {
+    fetch(forecast)
+      .then((res) => {
+        if (res.ok) {
+          return res.json();
+        }
+        throw new Error("Request for future days failed");
+      })
+      .then((json) => {
+        setFutureDays(
+          json.properties.periods.filter((obj) => obj.temperature > 85)
+        );
+      });
+  }, [futureDays, setFutureDays]);
 
   const handleLatitude = (event) => {
     const latitude = event.target.value;
@@ -72,7 +90,8 @@ const App = () => {
               ? "loading"
               : info.properties.relativeLocation.properties.state}
           </li>
-          <li>Temperature: {temperature}</li>
+          <li>Temperature(F): {temperature} F</li>
+          <li>Temperature(C): {((temperature - 32) * (5 / 9)).toFixed(2)} C</li>
           <li>
             Time Zone:{info === null ? "loading" : info.properties.timeZone}
           </li>
@@ -84,6 +103,12 @@ const App = () => {
                   .setZone(info.properties.timeZone)
                   .toLocaleString(DateTime.TIME_SIMPLE)}
           </li>
+        </ul>
+        <li>{futureDays.length > 0 ? "HEAT ADVISORY" : ""}</li>
+        <ul>
+          {futureDays.map((obj) => (
+            <li key={obj.number}>{obj.name}</li>
+          ))}
         </ul>
       </div>
     </div>
