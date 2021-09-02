@@ -1,5 +1,5 @@
 function isValid(coordinate) {
-  if (isNaN(Number(coordinate)) || coordinate === "") {
+  if (isNaN(Number(coordinate)) && coordinate[0] !== "-") {
     console.log("Please enter a valid number");
     return false;
   } else {

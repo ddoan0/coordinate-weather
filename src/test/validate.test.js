@@ -1,4 +1,4 @@
-const isValid = require("./Validate");
+const isValid = require("../utility/Validate");
 
 test("Validate a number", () => {
   expect(isValid("32")).toBeTruthy();
@@ -13,5 +13,5 @@ test("Validate a mixed string", () => {
 });
 
 test("Validate empty string", () => {
-  expect(isValid("")).toBeFalsy();
+  expect(isValid("")).toBeTruthy();
 });

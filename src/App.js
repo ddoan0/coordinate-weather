@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { DateTime } from "luxon";
 
-import isValid from "./Validate";
+import InputBoxes from "./components/InputBoxes";
+import CityTemp from "./components/CityTemp";
+import HeatAdvisory from "./components/HeatAdvisory";
+import isValid from "./utility/Validate";
+import "./App.css";
 
 const App = () => {
   const [latitude, setLatitude] = useState("32");
   const [longitude, setLongitude] = useState("-84");
-  const [temperature, setTemperature] = useState(0);
+  const [temperature, setTemperature] = useState([]);
   const [forecast, setForecast] = useState("");
   const [futureDays, setFutureDays] = useState([]);
   const [info, setInfo] = useState(null);
@@ -18,7 +21,7 @@ const App = () => {
         if (res.ok) {
           return res.json();
         }
-        throw new Error("Request failed");
+        throw new Error("Request failed for latitude and longitude");
       })
       .then((json) => {
         setInfo(json);
@@ -27,7 +30,7 @@ const App = () => {
       })
       .then((result) => result.json())
       .then((resJson) => {
-        setTemperature(resJson.properties.periods[0].temperature);
+        setTemperature(resJson.properties.periods);
       })
       .catch((error) => {
         console.error(error);
@@ -43,11 +46,17 @@ const App = () => {
         throw new Error("Request for future days failed");
       })
       .then((json) => {
-        setFutureDays(
-          json.properties.periods.filter((obj) => obj.temperature > 85)
-        );
+        if (json.properties.periods.temperatureUnit === "F") {
+          setFutureDays(
+            json.properties.periods.filter((obj) => obj.temperature > 85)
+          );
+        } else {
+          setFutureDays(
+            json.properties.periods.filter((obj) => obj.temperature > 29.44)
+          );
+        }
       });
-  }, [futureDays, setFutureDays]);
+  }, [button, setButton]);
 
   const handleLatitude = (event) => {
     const latitude = event.target.value;
@@ -68,49 +77,21 @@ const App = () => {
   };
 
   return (
-    <div>
-      <div>
-        Latitude
-        <input type="text" value={latitude} onChange={handleLatitude} />
-      </div>
-      Longitude
-      <input type="text" value={longitude} onChange={handleLongitude} />
-      <button onClick={onButtonClick}>Submit</button>
-      <div>
-        <ul>
-          <li>
-            City:{" "}
-            {info === null
-              ? "loading"
-              : info.properties.relativeLocation.properties.city}
-          </li>
-          <li>
-            State:{" "}
-            {info === null
-              ? "loading"
-              : info.properties.relativeLocation.properties.state}
-          </li>
-          <li>Temperature(F): {temperature} F</li>
-          <li>Temperature(C): {((temperature - 32) * (5 / 9)).toFixed(2)} C</li>
-          <li>
-            Time Zone:{info === null ? "loading" : info.properties.timeZone}
-          </li>
-          <li>
-            Time:{" "}
-            {info === null
-              ? "loading"
-              : DateTime.now()
-                  .setZone(info.properties.timeZone)
-                  .toLocaleString(DateTime.TIME_SIMPLE)}
-          </li>
-        </ul>
-        <li>{futureDays.length > 0 ? "HEAT ADVISORY" : ""}</li>
-        <ul>
-          {futureDays.map((obj) => (
-            <li key={obj.number}>{obj.name}</li>
-          ))}
-        </ul>
-      </div>
+    <div className="app">
+      <p>
+        {" "}
+        Please enter coordinates within the United States to retrieve weather
+        information.
+      </p>
+      <InputBoxes
+        latitude={latitude}
+        longitude={longitude}
+        handleLatitude={handleLatitude}
+        handleLongitude={handleLongitude}
+        onButtonClick={onButtonClick}
+      />
+      <CityTemp info={info} temperature={temperature} />
+      <HeatAdvisory futureDays={futureDays} />
     </div>
   );
 };
